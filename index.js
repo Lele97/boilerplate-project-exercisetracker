@@ -39,10 +39,12 @@ class NewExercise {
 }
 
 
-class Log extends Exercise{
-  constructor(count){
-    super()
-    this.count = count
+class Log{
+  constructor(user, count) { 
+    this._id = user._id; 
+    this.username = user.username; 
+    this.count = count; 
+    this.log = user.exercises
   }
 }
 
@@ -110,8 +112,8 @@ app.post("/api/users/:_id/exercises", (req, res) => {
   
   const exercise = new Exercise(description, duration, date);
  
-  if (!user.exercises) { 
-    user.exercises = []; 
+  if (!user.logs) { 
+    user.logs = []; 
   }
 
   user.exercises.push(exercise);
@@ -125,10 +127,6 @@ app.post("/api/users/:_id/exercises", (req, res) => {
   console.log("Exercise added!");
 });
 
-
-
-
-
 app.get("/api/users/:_id/logs",(req,res)=>{
   const id = req.params._id;
 
@@ -138,7 +136,10 @@ app.get("/api/users/:_id/logs",(req,res)=>{
     return res.status(404).send("User Not Found")
        
   const count = user.exercises.length
-  console.log("OK")
+
+  const log = new Log(user , count)
+  
+  res.json(log)
 })
 
 const listener = app.listen(process.env.PORT || 3000, () => {
