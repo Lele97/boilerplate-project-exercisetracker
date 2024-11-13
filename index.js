@@ -19,16 +19,27 @@ class User {
     }
 }
 
-class Exercize extends User {
+class Exercise extends User { 
     constructor(description, duration, date) {
-        super();
+      super();
         this.description = description;
         this.duration = duration;
         this.date = date
     }
 }
 
-class Log extends Exercize{
+class NewExercise {
+  constructor(username, description, duration, date, _id) {
+      this.username = username;
+      this.description = description;
+      this.duration = duration;
+      this.date = date;
+      this._id = _id;
+  }
+}
+
+
+class Log extends Exercise{
   constructor(count){
     super()
     this.count = count
@@ -52,38 +63,71 @@ app.get("/api/users", (req, res) => {
     res.send(users)
 })
 
+
 app.post("/api/users/:_id/exercises", (req, res) => {
-    const id = req.params._id;
-    const description = req.body.description;
-    const duration = req.body.duration;
-    let date = req.body.date;
-    const user = users.find(user => user._id === id)
-    
-    if(!user)
-      return res.status(404).send("User Not Found")
+  const id = req.params._id;
+  const description = req.body.description;
+  const duration = req.body.duration;
+  let date = req.body.date;
+  
+  const user = users.find(user => user._id === id);
+  
+  if (!user) {
+      return res.status(404).send("User Not Found");
+  }
+  
+  const username = user.username;
+  
+  if (!date) {
+      date = new Date().toISOString().split('T')[0];
+  }
+  
+  const exercise = new Exercise(description, duration, date);
+  
+  if (!user.exercises) {
+      user.exercises = [];
+  }
+  
+  user.exercises.push(exercise);
+  
+  const newExercise = new NewExercise(username, description, duration, date, id);
+  
+  res.json(newExercise);
+  
+  console.log("Exercise added!");
+});
 
-    const username = user.username
-    
-    if (!date) {
-        date = new Date().toISOString().split('T')[0];
-    }
 
-    const exercise = new Exercize(description, duration, date)
+app.post("/api/users/:_id/exercises", (req, res) => {
+  const id = req.params._id;
+  const { description, duration, date } = req.body;
+  
+  const user = users.find(user => user._id === id);
+  
+  if (!user) {
+      return res.status(404).send("User Not Found");
+  }
+  
+  const exercise = new Exercise(description, duration, date);
+ 
+  if (!user.exercises) { 
+    user.exercises = []; 
+  }
 
-    if (!user.exercises) {
-        user.exercises = [];
-    }
+  user.exercises.push(exercise);
+  
+  res.json({
+      _id: user._id,
+      username: user.username,
+      exercises: user.exercises
+  });
+  
+  console.log("Exercise added!");
+});
 
-    user.exercises.push(exercise)
 
 
-    res.json({  
-      username: username,
-      description: description,
-      duration: duration,
-      date: date,
-    _id:id})
-})
+
 
 app.get("/api/users/:_id/logs",(req,res)=>{
   const id = req.params._id;
