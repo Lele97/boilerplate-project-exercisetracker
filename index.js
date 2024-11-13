@@ -27,8 +27,7 @@ app.post("/api/users", (req, res) => {
     const _id = uuidv4();
     const user = new User(_id, username);
     users.push(user);
-    console.log(users);
-    res.redirect("/")
+    res.json(user)
 });
 
 app.get("/api/users", (req,res)=>{
