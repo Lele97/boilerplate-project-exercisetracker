@@ -16,7 +16,7 @@ class User {
     constructor(_id, username) {
         this._id = _id;
         this.username = username;
-        this.exercises = [];  // Initialize exercises array
+        this.exercises = [];
     }
 }
 
@@ -50,10 +50,13 @@ app.get('/', (req, res) => {
 });
 
 app.post("/api/users", (req, res) => {
+
     const username = req.body.username;
     const _id = uuidv4();
     const user = new User(_id, username);
+
     users.push(user);
+
     res.json(user);
 });
 
@@ -62,10 +65,9 @@ app.get("/api/users", (req, res) => {
 });
 
 app.post("/api/users/:_id/exercises", (req, res) => {
-    console.log(req.body)
+
     const id = req.params._id;
     const { description, duration, date } = req.body;
-
     const user = users.find(user => user._id === id);
 
     if (!user) {
@@ -73,22 +75,19 @@ app.post("/api/users/:_id/exercises", (req, res) => {
     }
 
     const exercise = new Exercise(description, duration, date);
+
     user.exercises.push(exercise);
 
     const newExercise = new NewExercise(user.username, description, duration, exercise.date, id);
 
     res.json(newExercise);
-
-    console.log("Exercise added!");
 });
 
 app.get("/api/users/:_id/logs", (req, res) => {
 
     let {from , to , limit} = req.query;
     let queryParam = false
-  
     const id = req.params._id;
-
     const user = users.find(user => user._id === id);
 
     if (!user) {
@@ -97,7 +96,6 @@ app.get("/api/users/:_id/logs", (req, res) => {
 
     let arrayfilter = user.exercises.slice();
    
-
     if(from){
         arrayfilter = arrayfilter.filter(exercise=> new Date(exercise.date) >= new Date(from))
         queryParam = true
@@ -112,9 +110,7 @@ app.get("/api/users/:_id/logs", (req, res) => {
         arrayfilter = arrayfilter.slice(0,parseInt(limit))
         queryParam = true
     }
-        
-    console.log(queryParam)
-
+    
     let count = arrayfilter.length
     let count_ = user.exercises.length
 
