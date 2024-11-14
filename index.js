@@ -62,6 +62,7 @@ app.get("/api/users", (req, res) => {
 });
 
 app.post("/api/users/:_id/exercises", (req, res) => {
+    console.log(req.body)
     const id = req.params._id;
     const { description, duration, date } = req.body;
 
@@ -82,6 +83,10 @@ app.post("/api/users/:_id/exercises", (req, res) => {
 });
 
 app.get("/api/users/:_id/logs", (req, res) => {
+
+    let {from , to , limit} = req.query;
+    let queryParam = false
+  
     const id = req.params._id;
 
     const user = users.find(user => user._id === id);
@@ -90,10 +95,42 @@ app.get("/api/users/:_id/logs", (req, res) => {
         return res.status(404).send("User Not Found");
     }
 
-    const count = user.exercises.length;
-    const log = new Log(user, count);
+    let arrayfilter = user.exercises.slice();
+   
 
-    res.json(log);
+    if(from){
+        arrayfilter = arrayfilter.filter(exercise=> new Date(exercise.date) >= new Date(from))
+        queryParam = true
+    }
+       
+    if(to){
+        arrayfilter = arrayfilter.filter(exercise=> new Date(exercise.date) <= new Date(to))
+        queryParam = true
+    }
+      
+    if(limit){
+        arrayfilter = arrayfilter.slice(0,parseInt(limit))
+        queryParam = true
+    }
+        
+    console.log(queryParam)
+
+    let count = arrayfilter.length
+    let count_ = user.exercises.length
+
+    if(queryParam){
+        const log = {
+             _id: user._id,
+              username: user.username,
+               count: count,
+            log: arrayfilter 
+            }; 
+            res.json(log)
+    }
+    else{
+        const log = new Log(user, count_);
+        res.json(log);
+    }   
 });
 
 const listener = app.listen(process.env.PORT || 3000, () => {
